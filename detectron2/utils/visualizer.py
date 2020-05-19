@@ -605,54 +605,55 @@ class Visualizer:
             keypoints = keypoints[sorted_idxs] if keypoints is not None else None
 
         for i in range(num_instances):
-            color = assigned_colors[i]
-            if boxes is not None:
-                self.draw_box(boxes[i], edge_color=color)
-
-            if masks is not None:
-                for segment in masks[i].polygons:
-                    self.draw_polygon(segment.reshape(-1, 2), color, alpha=alpha)
-
-            if labels is not None:
-                # first get a box
+            if labels[i]=="person":
+                color = assigned_colors[i]
                 if boxes is not None:
-                    x0, y0, x1, y1 = boxes[i]
-                    text_pos = (x0, y0)  # if drawing boxes, put text on the box corner.
-                    horiz_align = "left"
-                elif masks is not None:
-                    x0, y0, x1, y1 = masks[i].bbox()
+                    self.draw_box(boxes[i], edge_color=color)
 
-                    # draw text in the center (defined by median) when box is not drawn
-                    # median is less sensitive to outliers.
-                    text_pos = np.median(masks[i].mask.nonzero(), axis=1)[::-1]
-                    horiz_align = "center"
-                else:
-                    continue  # drawing the box confidence for keypoints isn't very useful.
-                # for small objects, draw text at the side to avoid occlusion
-                instance_area = (y1 - y0) * (x1 - x0)
-                if (
-                    instance_area < _SMALL_OBJECT_AREA_THRESH * self.output.scale
-                    or y1 - y0 < 40 * self.output.scale
-                ):
-                    if y1 >= self.output.height - 5:
-                        text_pos = (x1, y0)
+                if masks is not None:
+                    for segment in masks[i].polygons:
+                        self.draw_polygon(segment.reshape(-1, 2), color, alpha=alpha)
+
+                if labels is not None:
+                    # first get a box
+                    if boxes is not None:
+                        x0, y0, x1, y1 = boxes[i]
+                        text_pos = (x0, y0)  # if drawing boxes, put text on the box corner.
+                        horiz_align = "left"
+                    elif masks is not None:
+                        x0, y0, x1, y1 = masks[i].bbox()
+
+                        # draw text in the center (defined by median) when box is not drawn
+                        # median is less sensitive to outliers.
+                        text_pos = np.median(masks[i].mask.nonzero(), axis=1)[::-1]
+                        horiz_align = "center"
                     else:
-                        text_pos = (x0, y1)
+                        continue  # drawing the box confidence for keypoints isn't very useful.
+                    # for small objects, draw text at the side to avoid occlusion
+                    instance_area = (y1 - y0) * (x1 - x0)
+                    if (
+                        instance_area < _SMALL_OBJECT_AREA_THRESH * self.output.scale
+                        or y1 - y0 < 40 * self.output.scale
+                    ):
+                        if y1 >= self.output.height - 5:
+                            text_pos = (x1, y0)
+                        else:
+                            text_pos = (x0, y1)
 
-                height_ratio = (y1 - y0) / np.sqrt(self.output.height * self.output.width)
-                lighter_color = self._change_color_brightness(color, brightness_factor=0.7)
-                font_size = (
-                    np.clip((height_ratio - 0.02) / 0.08 + 1, 1.2, 2)
-                    * 0.5
-                    * self._default_font_size
-                )
-                self.draw_text(
-                    labels[i],
-                    text_pos,
-                    color=lighter_color,
-                    horizontal_alignment=horiz_align,
-                    font_size=font_size,
-                )
+                    height_ratio = (y1 - y0) / np.sqrt(self.output.height * self.output.width)
+                    lighter_color = self._change_color_brightness(color, brightness_factor=0.7)
+                    font_size = (
+                        np.clip((height_ratio - 0.02) / 0.08 + 1, 1.2, 2)
+                        * 0.5
+                        * self._default_font_size
+                    )
+                    self.draw_text(
+                        labels[i],
+                        text_pos,
+                        color=lighter_color,
+                        horizontal_alignment=horiz_align,
+                        font_size=font_size,
+                    )
 
         # draw keypoints
         if keypoints is not None:
