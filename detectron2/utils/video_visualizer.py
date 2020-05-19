@@ -83,7 +83,7 @@ class VideoVisualizer:
 
         detected = [
             _DetectedInstance(classes[i], boxes[i], mask_rle=None, color=None, ttl=8)
-            for i in range(num_instances)
+            for i in range(num_instances) if classes[i]==0
         ]
         colors = self._assign_colors(detected)
 
