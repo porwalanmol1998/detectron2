@@ -605,7 +605,7 @@ class Visualizer:
             keypoints = keypoints[sorted_idxs] if keypoints is not None else None
 
         for i in range(num_instances):
-            if "car" in labels[i] or "bus" in labels[i] or "truck" in labels[i]:
+            if "person" in labels[i]:
                 color = assigned_colors[i]
                 if boxes is not None:
                     self.draw_box(boxes[i], edge_color=color)
